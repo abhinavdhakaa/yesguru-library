@@ -1,14 +1,10 @@
-from flask import Flask, request, jsonify, render_template
-import razorpay
-from flask_cors import CORS
-import os
+from flask import Flask
 import psycopg2
+import os
 
 app = Flask(__name__)
-CORS(app)
 
-# Connect to PostgreSQL using environment variables
-
+# Database connection function
 def get_db_connection():
     return psycopg2.connect(
         host=os.getenv('DB_HOST'),
@@ -18,19 +14,18 @@ def get_db_connection():
         port=int(os.getenv('DB_PORT', 5432))
     )
 
-cursor = conn.cursor()
-
 @app.route('/')
 def index():
-    cursor.execute('SELECT NOW();')  # Sample query to check DB connection
+    conn = get_db_connection()       # ✅ Establish connection here
+    cursor = conn.cursor()
+    cursor.execute('SELECT NOW();')  # ✅ Example query
     result = cursor.fetchone()
+    cursor.close()
+    conn.close()
     return f"Database time is: {result[0]}"
-
-# Define your other routes and Razorpay logic here
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
 
 
