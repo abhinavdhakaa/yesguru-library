@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting to Payment</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<script>
+var options = {
+    "key": "rzp_test_KhHe2W8qafLz6Q",
+    "amount": "500",
+    "currency": "INR",
+    "name": "Library Access",
+    "description": "6 Month Library Subscription",
+    "order_id": "{{ order.id }}",
+    "handler": function (response){
+        alert("Payment successful. You'll be redirected.");
+        window.location.href = "/thankyou";
+    },
+    "prefill": {
+        "name": "{{ user.name }}",
+        "email": "{{ user.email }}",
+        "contact": "{{ user.phone }}"
+    },
+    "theme": {
+        "color": "#0e76a8"
+    }
+};
+var rzp1 = new Razorpay(options);
+rzp1.open();
+</script>
+</body>
+</html>

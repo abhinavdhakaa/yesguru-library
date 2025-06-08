@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Yes Guru Library</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+  <div class="logo-container">
+    <img src="{{ url_for('static', filename='assets/logo.jpg') }}" alt="Yes Guru Logo">
+
+    <h1>Yes Guru Library</h1>
+  </div>
+
+  <div class="form-container">
+    <form id="payment-form">
+      <input type="text" name="name" placeholder="Full Name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="text" name="phone" placeholder="Phone Number" required>
+      <input type="text" name="seat" placeholder="Seat Number" required>
+      
+      <label style="font-weight:bold; margin-top:20px;">Choose Subscription Plan:</label><br>
+      <input type="radio" id="3month" class="radio" name="plan" value="3" checked>
+      <label for="3month">3 Months - ₹700/month</label><br>
+      <input type="radio" id="6month" class="radio" name="plan" value="6">
+      <label for="6month">6 Months - ₹700/month</label><br>
+
+      <button type="button" onclick="startPayment()">Subscribe Now</button>
+    </form>
+  </div>
+
+  <div style="text-align: center; margin: 30px 0; font-size: 14px; color: #555;">
+    For support: <b>yesguru2030@gmailc.com</b><br>
+    Yes Guru Library Team
+  </div>
+  <footer>
+  <a href="/terms">Terms & Conditions</a> |
+  <a href="/privacy">Privacy Policy</a> |
+  <a href="/refund">Refund Policy</a> |
+  <a href="/contact">Contact Us</a>
+</footer>
+
+
+<script>
+function startPayment() {
+  const name = document.querySelector('input[name="name"]').value;
+  const email = document.querySelector('input[name="email"]').value;
+  const phone = document.querySelector('input[name="phone"]').value;
+  const seat = document.querySelector('input[name="seat"]').value;
+  const plan = document.querySelector('input[name="plan"]:checked').value;
+
+  if (!name || !email || !phone || !seat) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  fetch('/create-subscription', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ name, email, phone, seat, plan })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data && data.id) {
+      const options = {
+        key: "rzp_test_KhHe2W8qafLz6Q",
+        subscription_id: data.id,
+        name: "Yes Guru Library",
+        description: plan + " Month Subscription",
+        image: "{{ url_for('static', filename='logo.png') }}",
+        handler: function (response){
+          alert('Subscription successful! Payment ID: ' + response.razorpay_payment_id);
+          window.location.href = "/success";
+        },
+        prefill: {
+          name: name,
+          email: email,
+          contact: phone
+        },
+        theme: {
+          color: "#00cec9"
+        }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } else {
+      alert("Subscription creation failed. Please try again.");
+    }
+  });
+}
+</script>
+
+</body>
+</html>

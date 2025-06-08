@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>📋 User Subscriptions</h1>
+  <table border="1">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Seat</th>
+      <th>Plan (Months)</th>
+      <th>Status</th>
+      <th>Created At</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>{{ user.name }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.phone }}</td>
+      <td>{{ user.seat }}</td>
+      <td>{{ user.plan_months }}</td>
+      <td>{{ user.status }}</td>
+      <td>{{ user.created_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <br>
+  <a href="/admin/logout">Logout</a>
+</body>
+
+<style>
+   body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid #333;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+ 
+</style>
+</html>
