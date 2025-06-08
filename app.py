@@ -22,7 +22,7 @@ razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 # Razorpay plan IDs (replace with your actual plan IDs)
 PLAN_3_MONTHS = "plan_QejEDBpS7ao58Q"  # 3 months plan ID
-PLAN_6_MONTHS = "plan_Qdx1DJRuKA031n"  # 6 months plan ID
+PLAN_6_MONTHS = "plan_QejYivaGjJhgup"  # 6 months plan ID
 
 @app.route('/')
 def home():
