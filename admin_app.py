@@ -1,23 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-import mysql.connector
+import psycopg2
+import os
 
 app = Flask(__name__, template_folder='templates_admin', static_folder='static')
 app.secret_key = 'your_secret_key'  # Change this in production
 
 
-# your routes and logic here
+# PostgreSQL connection
 
-if __name__ == "__main__":
-    app.run()
-
-
-# MySQL connection
 def get_db_connection():
-    return mysql.connector.connect(
-        host='localhost',
-        user='root',
-        password='Abc@123',
-        database='yesguru_library'
+    return psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        port=int(os.getenv('DB_PORT', 5432))
     )
 
 # Admin login route
@@ -28,8 +25,8 @@ def admin_login():
         password = request.form['password']
 
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM admin_users WHERE username=%s AND password=%s", (username, password))
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM admin_users WHERE username = %s AND password = %s", (username, password))
         admin = cursor.fetchone()
         cursor.close()
         conn.close()
@@ -42,6 +39,19 @@ def admin_login():
             flash("Invalid credentials", "error")
 
     return render_template('admin_login.html')
+
+
+# Admin dashboard route
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+    return render_template('admin_dashboard.html')
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
 
 # Admin dashboard with table
 @app.route('/admin/dashboard')
