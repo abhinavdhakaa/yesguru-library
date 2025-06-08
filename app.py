@@ -16,13 +16,13 @@ def get_db_connection():
     )
 
 # Razorpay credentials
-RAZORPAY_KEY_ID = "rzp_test_KhHe2W8qafLz6Q"
-RAZORPAY_KEY_SECRET = "TCdhjXche8HiPI6VTsSmzp7z"
+RAZORPAY_KEY_ID = "rzp_test_KhHe2W8qafLz6Q"       # Your publishable key
+RAZORPAY_KEY_SECRET = "TCdhjXche8HiPI6VTsSmzp7z"   # Your secret key
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
-# Your Razorpay plan IDs for monthly ₹700 recurring
-PLAN_3_MONTHS = "plan_QejEDBpS7ao58Q"  # Replace with actual 3 month plan ID
-PLAN_6_MONTHS = "plan_Qdx1DJRuKA031n"  # Replace with actual 6 month plan ID
+# Razorpay plan IDs (replace with your actual plan IDs)
+PLAN_3_MONTHS = "plan_QejEDBpS7ao58Q"  # 3 months plan ID
+PLAN_6_MONTHS = "plan_Qdx1DJRuKA031n"  # 6 months plan ID
 
 @app.route('/')
 def home():
@@ -37,12 +37,11 @@ def home():
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-
 @app.route('/create-subscription', methods=['POST'])
 def create_subscription():
     try:
         data = request.json
-        plan_duration = data.get('plan')  # Expected "3" or "6"
+        plan_duration = data.get('plan')  # "3" or "6"
 
         if plan_duration == "3":
             plan_id = PLAN_3_MONTHS
@@ -68,11 +67,14 @@ def create_subscription():
             "customer_id": customer['id']
         })
 
-        return jsonify({"id": subscription['id']})
+        # Return subscription ID & Razorpay publishable key
+        return jsonify({
+            "id": subscription['id'],
+            "razorpay_key": RAZORPAY_KEY_ID
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
@@ -103,7 +105,6 @@ def add_user():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route('/users')
 def list_users():
     try:
@@ -129,7 +130,6 @@ def list_users():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5500)

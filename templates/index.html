@@ -46,57 +46,56 @@
 
   <!-- JavaScript to handle payment -->
   <script>
-    function startPayment() {
-      const name = document.querySelector('input[name="name"]').value;
-      const email = document.querySelector('input[name="email"]').value;
-      const phone = document.querySelector('input[name="phone"]').value;
-      const seat = document.querySelector('input[name="seat"]').value;
-      const plan = document.querySelector('input[name="plan"]:checked').value;
+function startPayment() {
+  const name = document.querySelector('input[name="name"]').value;
+  const email = document.querySelector('input[name="email"]').value;
+  const phone = document.querySelector('input[name="phone"]').value;
+  const seat = document.querySelector('input[name="seat"]').value;
+  const plan = document.querySelector('input[name="plan"]:checked').value;
 
-      if (!name || !email || !phone || !seat) {
-        alert("Please fill in all fields.");
-        return;
-      }
+  if (!name || !email || !phone || !seat) {
+    alert("Please fill in all fields.");
+    return;
+  }
 
-      fetch('/create-subscription', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ name, email, phone, seat, plan })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.id) {
-          const options = {
-            key: data.razorpay_key,
-            amount: plan * 700 * 100,
-            currency: "INR",
-            order_id: data.id,
-            name: "Yes Guru Library",
-            description: `${plan}-Month Subscription`,
-            image: "{{ url_for('static', filename='assets/logo.jpg') }}",
-            handler: function (response) {
-              alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
-              window.location.href = "/success";
-            },
-            prefill: {
-              name: name,
-              email: email,
-              contact: phone
-            },
-            theme: {
-              color: "#00cec9"
-            }
-          };
-          const rzp = new Razorpay(options);
-          rzp.open();
-        } else {
-          alert("Subscription creation failed. Please try again.");
+  fetch('/create-subscription', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ name, email, phone, seat, plan })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data && data.id) {
+      const options = {
+        key: "rzp_test_KhHe2W8qafLz6Q",  // Your Razorpay publishable key here
+        subscription_id: data.id,  // This is subscription ID from backend
+        name: "Yes Guru Library",
+        description: `${plan}-Month Subscription`,
+        image: "{{ url_for('static', filename='assets/logo.jpg') }}",
+        handler: function (response) {
+          alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
+          window.location.href = "/success";
+        },
+        prefill: {
+          name: name,
+          email: email,
+          contact: phone
+        },
+        theme: {
+          color: "#00cec9"
         }
-      })
-      .catch(err => {
-        alert("Error: " + err);
-      });
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } else {
+      alert("Subscription creation failed. Please try again.");
     }
+  })
+  .catch(err => {
+    alert("Error: " + err);
+  });
+}
+
   </script>
 </body>
 </html>
