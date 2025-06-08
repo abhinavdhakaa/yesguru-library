@@ -1,78 +1,61 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, session
 import psycopg2
+from datetime import datetime
 import os
 
-app = Flask(__name__, template_folder='templates_admin', static_folder='static')
-app.secret_key = 'your_secret_key'  # Change this in production
+admin_app = Flask(__name__, template_folder='templates_admin')
+admin_app.secret_key = 'your_secret_key'  # Change to secure random key
 
-
-# PostgreSQL connection
-
+# Database connection
 def get_db_connection():
     return psycopg2.connect(
-        host=os.getenv('DB_HOST'),
-        database=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        port=int(os.getenv('DB_PORT', 5432))
+        host="dpg-d12gu1mmcj7s73fblae0-a.oregon-postgres.render.com",
+        database="yesguru_db",
+        user="yesguru_admin",
+        password="t8PL0yKLPiRNlUVdNlgoPLPa23YTvhiu",
+        port=5432
     )
 
-# Admin login route
-@app.route('/admin/login', methods=['GET', 'POST'])
+# Admin credentials (store securely in production)
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'admin'
+
+# Admin login
+@admin_app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM admin_users WHERE username = %s AND password = %s", (username, password))
-        admin = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
-        if admin:
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session['admin_logged_in'] = True
-            session['admin_username'] = username
-            return redirect(url_for('admin_dashboard'))
+            return redirect('/admin/dashboard')
         else:
-            flash("Invalid credentials", "error")
-
+            return render_template('admin_login.html', error="Invalid credentials.")
     return render_template('admin_login.html')
 
-
-# Admin dashboard route
-@app.route('/admin/dashboard')
+# Admin dashboard
+@admin_app.route('/admin/dashboard')
 def admin_dashboard():
     if not session.get('admin_logged_in'):
-        return redirect(url_for('admin_login'))
-    return render_template('admin_dashboard.html')
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
-
-# Admin dashboard with table
-@app.route('/admin/dashboard')
-def admin_dashboard():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin_login'))
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM users")  # Ensure 'users' table exists with needed columns
-    users = cursor.fetchall()
-    cursor.close()
-    conn.close()
+        return redirect('/admin')
+    
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, student_name, father_name, email, mobile_number, ip_address, subscribed_on FROM users ORDER BY subscribed_on DESC;")
+        users = cur.fetchall()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        return f"Database error: {e}", 500
 
     return render_template('admin_dashboard.html', users=users)
 
-# Logout
-@app.route('/admin/logout')
+# Admin logout
+@admin_app.route('/admin/logout')
 def admin_logout():
-    session.clear()
-    return redirect(url_for('admin_login'))
+    session.pop('admin_logged_in', None)
+    return redirect('/admin')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    admin_app.run(debug=True, port=5501)
