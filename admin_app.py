@@ -6,6 +6,11 @@ import os
 admin_app = Flask(__name__, template_folder='templates_admin')
 admin_app.secret_key = 'your_secret_key'  # Change to secure random key
 
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5500))  # Use PORT env var if available
+    app.run(debug=False, host='0.0.0.0', port=port)
+
+    
 # Database connection
 def get_db_connection():
     return psycopg2.connect(
