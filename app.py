@@ -1,14 +1,10 @@
-from flask import Flask
+from flask import Flask, request, render_template, jsonify
 import psycopg2
-import os
 import razorpay
-
 
 app = Flask(__name__)
 
-# Database connection function
-
-# Helper function to create a new DB connection
+# -------------------- Database Config --------------------
 def get_db_connection():
     return psycopg2.connect(
         host="dpg-d12gu1mmcj7s73fblae0-a.oregon-postgres.render.com",
@@ -18,8 +14,30 @@ def get_db_connection():
         port=5432
     )
 
+# -------------------- Razorpay Setup --------------------
+RAZORPAY_KEY_ID = "rzp_test_KhHe2W8qafLz6Q"
+RAZORPAY_KEY_SECRET = "TCdhjXche8HiPI6VTsSmzp7z"
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+
+# -------------------- Routes --------------------
 @app.route('/')
-def index():
+def home():
+    ip = request.remote_addr
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM users WHERE ip_address = %s AND status = 'active'", (ip,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if user:
+        message = f"👋 Welcome back, {user[0]}! Your subscription is active."
+    else:
+        message = "Welcome! Please subscribe to access the library."
+    return render_template("home.html", message=message)
+
+@app.route('/dbtime')
+def dbtime():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT NOW();')
@@ -32,48 +50,11 @@ def index():
 def add_user():
     conn = get_db_connection()
     cursor = conn.cursor()
-    
-    query = "INSERT INTO users (name, email) VALUES (%s, %s)"
-    values = ('Abhinav', 'abhinav@example.com')
-    
-    cursor.execute(query, values)
+    cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", ('Abhinav', 'abhinav@example.com'))
     conn.commit()
     cursor.close()
     conn.close()
-    
     return "User added successfully!"
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
-
-
-# Razorpay credentials
-RAZORPAY_KEY_ID = "rzp_test_KhHe2W8qafLz6Q"
-RAZORPAY_KEY_SECRET = "TCdhjXche8HiPI6VTsSmzp7z"
-
-# Razorpay client
-razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
-
-# MySQL database connection
-import mysql.connector
-
-
-@app.route('/some-route')
-def example():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM your_table_name")  # sample query
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return str(rows)
-
-cursor = db.cursor()
-
-@app.route('/')
-def index():
-    return render_template('index.html', razorpay_key_id=RAZORPAY_KEY_ID)
 
 @app.route('/create-subscription', methods=['POST'])
 def create_subscription():
@@ -83,10 +64,10 @@ def create_subscription():
     phone = data.get("phone")
     seat = data.get("seat")
     plan = int(data.get("plan"))
+    ip = request.remote_addr
 
-    # Create a Razorpay plan (once created, you can store and reuse its ID)
     plan_id = {
-        3: 'plan_Qdx1SqDRLXuoSs',  # Replace with your actual Razorpay plan IDs
+        3: 'plan_Qdx1SqDRLXuoSs',
         6: 'plan_Qdx1SqDRLXuoSs'
     }.get(plan)
 
@@ -103,12 +84,15 @@ def create_subscription():
         subscription = razorpay_client.subscription.create(subscription_data)
         subscription_id = subscription['id']
 
-        # Save in database
+        conn = get_db_connection()
+        cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO users (name, email, phone, seat, plan_months, subscription_id, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (name, email, phone, seat, plan, subscription_id, "created"))
-        db.commit()
+            INSERT INTO users (name, email, phone, seat, plan_months, subscription_id, status, ip_address)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (name, email, phone, seat, plan, subscription_id, "created", ip))
+        conn.commit()
+        cursor.close()
+        conn.close()
 
         return jsonify({"id": subscription_id})
     except Exception as e:
@@ -117,27 +101,6 @@ def create_subscription():
 @app.route('/success')
 def success():
     return "<h1>Thank you for subscribing!</h1>"
-
-if __name__ == '__main__':
-    app.run(port=5500)
-
-@app.route('/')
-def home():
-    ip = get_client_ip()
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM users WHERE ip_address = %s AND status = 'active'", (ip,))
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
-
-    if user:
-        message = f"👋 Welcome back, {user['name']}! Your subscription is active."
-    else:
-        message = "Welcome! Please subscribe to access the library."
-
-    return render_template('home.html', message=message)
 
 @app.route('/terms')
 def terms():
@@ -154,3 +117,7 @@ def refund():
 @app.route('/contact')
 def contact():
     return render_template("contact.html")
+
+# -------------------- Main --------------------
+if __name__ == '__main__':
+    app.run(debug=True, port=5500)
