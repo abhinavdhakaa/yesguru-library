@@ -7,28 +7,44 @@ import razorpay
 app = Flask(__name__)
 
 # Database connection function
+
+# Helper function to create a new DB connection
 def get_db_connection():
     return psycopg2.connect(
-        host=os.getenv('DB_HOST'),
-        database=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        port=int(os.getenv('DB_PORT', 5432))
+        host="dpg-d12gu1mmcj7s73fblae0-a.oregon-postgres.render.com",
+        database="yesguru_db",
+        user="yesguru_admin",
+        password="t8PL0yKLPiRNlUVdNlgoPLPa23YTvhiu",
+        port=5432
     )
 
 @app.route('/')
 def index():
-    conn = get_db_connection()       # ✅ Establish connection here
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT NOW();')  # ✅ Example query
+    cursor.execute('SELECT NOW();')
     result = cursor.fetchone()
     cursor.close()
     conn.close()
     return f"Database time is: {result[0]}"
 
+@app.route('/add_user')
+def add_user():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = "INSERT INTO users (name, email) VALUES (%s, %s)"
+    values = ('Abhinav', 'abhinav@example.com')
+    
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return "User added successfully!"
+
 if __name__ == "__main__":
     app.run(debug=True)
-
 
 
 
@@ -43,14 +59,15 @@ razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 import mysql.connector
 
 
-def get_db_connection():
-    return psycopg2.connect(
-        host=os.getenv('DB_HOST'),
-        database=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        port=int(os.getenv('DB_PORT', 5432))
-    )
+@app.route('/some-route')
+def example():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM your_table_name")  # sample query
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return str(rows)
 
 cursor = db.cursor()
 
