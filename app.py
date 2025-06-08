@@ -42,13 +42,15 @@ razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 # MySQL database connection
 import mysql.connector
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Abc@123",             # ✅ your actual MySQL password as string
-    database="yesguru_library"
 
-)
+def get_db_connection():
+    return psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        port=int(os.getenv('DB_PORT', 5432))
+    )
 
 cursor = db.cursor()
 
