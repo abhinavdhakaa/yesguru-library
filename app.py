@@ -20,6 +20,8 @@ RAZORPAY_KEY_ID = "rzp_test_KhHe2W8qafLz6Q"
 RAZORPAY_KEY_SECRET = "TCdhjXche8HiPI6VTsSmzp7z"
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
+from flask import render_template
+
 @app.route('/')
 def home():
     try:
@@ -29,7 +31,7 @@ def home():
         current_time = cursor.fetchone()[0]
         cursor.close()
         conn.close()
-        return f"Database time is: {current_time}"
+        return render_template('index.html', db_time=current_time)
     except Exception as e:
         return f"Error: {str(e)}", 500
 
