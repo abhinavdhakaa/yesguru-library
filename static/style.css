@@ -1,120 +1,136 @@
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #a8edea, #fed6e3);
+/* Import Bootstrap */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css');
+
+/* Basic Reset */
+body, html {
   margin: 0;
   padding: 0;
-  animation: fadeIn 1s ease-in-out;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  scroll-behavior: smooth;
 }
 
+/* Logo Section */
 .logo-container {
   text-align: center;
-  margin-top: 30px;
+  padding: 30px 20px 10px;
+  background-color: #ffffff;
+  border-bottom: 2px solid #00cec9;
   animation: fadeInDown 1s ease-out;
 }
 
 .logo-container img {
-  height: 80px;
-  margin-bottom: 10px;
+  max-width: 120px;
+  height: auto;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 206, 201, 0.3);
+  transition: transform 0.3s;
+}
+.logo-container img:hover {
+  transform: scale(1.05);
 }
 
 .logo-container h1 {
-  font-size: 28px;
-  color: #2c3e50;
-  margin: 0;
+  font-size: 2rem;
+  margin-top: 15px;
+  color: #00cec9;
 }
-#radio{
-  border-color: #00b894;
-}
-.form-container, .thankyou-container {
-  background-color: #fff;
-  padding: 30px 20px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  text-align: center;
+
+/* Form Section */
+.form-container {
+  max-width: 500px;
   margin: 30px auto;
+  padding: 25px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  animation: fadeInUp 1s ease-out;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"] {
   width: 100%;
-  max-width: 450px;
-  animation: popUp 0.8s ease-out;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  transition: 0.3s;
 }
 
-form input {
-  display: block;
-  margin: 15px auto;
-  padding: 14px;
-  width: 90%;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  transition: all 0.3s ease-in-out;
-  font-size: 16px;
-}
-
-form input:focus {
-  border-color: #00b894;
-  box-shadow: 0 0 5px rgba(0, 184, 148, 0.4);
+.form-container input[type="text"]:focus,
+.form-container input[type="email"]:focus {
+  border-color: #00cec9;
   outline: none;
+  box-shadow: 0 0 8px rgba(0, 206, 201, 0.3);
 }
 
-button {
+.radio {
+  margin-right: 10px;
+}
+
+.form-container button {
+  width: 100%;
+  padding: 12px;
   background-color: #00cec9;
-  color: white;
   border: none;
-  padding: 14px 25px;
-  cursor: pointer;
+  color: white;
   font-size: 16px;
-  border-radius: 8px;
-  margin-top: 20px;
-  transition: background-color 0.4s ease-in-out;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  margin-top: 15px;
+  transition: 0.4s;
+  font-weight: bold;
 }
 
-button:hover {
-  background-color: #0984e3;
+.form-container button:hover {
+  background-color: #009e9a;
+  box-shadow: 0 0 10px rgba(0, 206, 201, 0.5);
 }
 
-@keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity: 1;}
+/* Footer */
+footer {
+  margin-top: 50px;
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  background: #f1f1f1;
+  color: #666;
+  border-top: 1px solid #ddd;
+}
+
+footer a {
+  color: #00cec9;
+  text-decoration: none;
+  margin: 0 8px;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes popUp {
-  0% {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Fullscreen for mobile */
-@media screen and (max-width: 600px) {
-  .form-container, .thankyou-container {
-    margin: 0;
-    height: 100vh;
-    border-radius: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .logo-container img {
-    height: 60px;
+/* Responsive */
+@media (max-width: 576px) {
+  .form-container {
+    padding: 20px;
+    margin: 15px;
   }
 
   .logo-container h1 {
-    font-size: 22px;
+    font-size: 1.5rem;
+  }
+
+  footer {
+    font-size: 12px;
   }
 }
-
