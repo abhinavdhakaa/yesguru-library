@@ -6,6 +6,12 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+
+# your routes and logic here
+
+if __name__ == "__main__":
+    app.run()
+
 # Razorpay credentials
 RAZORPAY_KEY_ID = "rzp_test_KhHe2W8qafLz6Q"
 RAZORPAY_KEY_SECRET = "TCdhjXche8HiPI6VTsSmzp7z"

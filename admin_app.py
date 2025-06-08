@@ -4,6 +4,13 @@ import mysql.connector
 app = Flask(__name__, template_folder='templates_admin', static_folder='static')
 app.secret_key = 'your_secret_key'  # Change this in production
 
+
+# your routes and logic here
+
+if __name__ == "__main__":
+    app.run()
+
+
 # MySQL connection
 def get_db_connection():
     return mysql.connector.connect(
