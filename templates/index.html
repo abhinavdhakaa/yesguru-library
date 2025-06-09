@@ -64,8 +64,8 @@ function startPayment() {
     return;
   }
 
-  fetch('/create-subscription', {
-    method: 'POST',
+  fetch("/create-subscription", {
+    method: "POST",
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ name, email, phone, seat, plan })
   })
@@ -73,14 +73,14 @@ function startPayment() {
   .then(data => {
     if (data && data.id) {
       const options = {
-        key: "rzp_test_KhHe2W8qafLz6Q",  // Your Razorpay publishable key
+        key: "rzp_test_KhHe2W8qafLz6Q",  // <-- Hardcoded Razorpay publishable key here
         subscription_id: data.id,
         name: "Yes Guru Library",
         description: `${plan}-Month Subscription`,
-        image: "/static/assets/logo.jpg", // Use this if script is external or not template rendered
+        image: "/static/assets/logo.jpg",
         handler: function (response) {
           alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
-          window.location.href = "/success";  // Make sure this route exists
+          window.location.href = "/success";
         },
         prefill: {
           name: name,
@@ -102,7 +102,9 @@ function startPayment() {
     alert("Error: " + err);
   });
 }
+
 </script>
+
 
 </body>
 </html>
