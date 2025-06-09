@@ -46,15 +46,16 @@
   </footer>
 
   <!-- JavaScript to handle payment -->
-  <script>
+<script>
 function startPayment() {
   const name = document.querySelector('input[name="name"]').value;
   const email = document.querySelector('input[name="email"]').value;
   const phone = document.querySelector('input[name="phone"]').value;
   const seat = document.querySelector('input[name="seat"]').value;
-  const plan = document.querySelector('input[name="plan"]:checked').value;
+  const planInput = document.querySelector('input[name="plan"]:checked');
+  const plan = planInput ? planInput.value : null;
 
-  if (!name || !email || !phone || !seat) {
+  if (!name || !email || !phone || !seat || !plan) {
     alert("Please fill in all fields.");
     return;
   }
@@ -68,14 +69,14 @@ function startPayment() {
   .then(data => {
     if (data && data.id) {
       const options = {
-        key: "rzp_test_KhHe2W8qafLz6Q",  // Your Razorpay publishable key here
-        subscription_id: data.id,  // This is subscription ID from backend
+        key: "rzp_test_KhHe2W8qafLz6Q",  // Your Razorpay publishable key
+        subscription_id: data.id,
         name: "Yes Guru Library",
         description: `${plan}-Month Subscription`,
-        image: "{{ url_for('static', filename='assets/logo.jpg') }}",
+        image: "/static/assets/logo.jpg", // Use this if script is external or not template rendered
         handler: function (response) {
           alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
-          window.location.href = "/success";
+          window.location.href = "/success";  // Make sure this route exists
         },
         prefill: {
           name: name,
@@ -93,10 +94,11 @@ function startPayment() {
     }
   })
   .catch(err => {
+    console.error("Payment Error:", err);
     alert("Error: " + err);
   });
 }
+</script>
 
-  </script>
 </body>
 </html>

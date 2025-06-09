@@ -131,9 +131,6 @@ def list_users():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5500)
-
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -153,3 +150,8 @@ def privacy():
 @app.route('/refund')
 def refund():
     return render_template('refund.html')
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=5500)
+
