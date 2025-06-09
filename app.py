@@ -70,7 +70,7 @@ def create_subscription():
         # Return subscription ID & Razorpay publishable key
         return jsonify({
             "id": subscription['id'],
-            "razorpay_key": RAZORPAY_KEY_ID
+            "razorpay_key": rzp_test_KhHe2W8qafLz6Q
         })
 
     except Exception as e:
