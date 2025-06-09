@@ -141,12 +141,15 @@ def about():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
+
 @app.route('/terms')
-def contact():
+def terms():
     return render_template('terms.html')
- @app.route('/privacy')
-def contact():
+
+@app.route('/privacy')
+def privacy():
     return render_template('privacy.html')
- @app.route('/refund')
-def contact():
+
+@app.route('/refund')
+def refund():
     return render_template('refund.html')
