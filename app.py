@@ -5,7 +5,7 @@ import razorpay
 
 app = Flask(__name__)
 
-# DB connection
+# Database connection
 def get_db_connection():
     return psycopg2.connect(
         host="dpg-d12gu1mmcj7s73fblae0-a.oregon-postgres.render.com",
@@ -16,13 +16,13 @@ def get_db_connection():
     )
 
 # Razorpay credentials
-RAZORPAY_KEY_ID = "rzp_test_KhHe2W8qafLz6Q"       # Your publishable key
-RAZORPAY_KEY_SECRET = "TCdhjXche8HiPI6VTsSmzp7z"   # Your secret key
+RAZORPAY_KEY_ID = "rzp_test_KhHe2W8qafLz6Q"
+RAZORPAY_KEY_SECRET = "TCdhjXche8HiPI6VTsSmzp7z"
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
-# Razorpay plan IDs (replace with your actual plan IDs)
-PLAN_3_MONTHS = "plan_QejEDBpS7ao58Q"  # 3 months plan ID
-PLAN_6_MONTHS = "plan_QejYivaGjJhgup"  # 6 months plan ID
+# Razorpay Plan IDs
+PLAN_3_MONTHS = "plan_QejEDBpS7ao58Q"
+PLAN_6_MONTHS = "plan_QejYivaGjJhgup"
 
 @app.route('/')
 def home():
@@ -40,8 +40,17 @@ def home():
 @app.route('/create-subscription', methods=['POST'])
 def create_subscription():
     try:
-        data = request.json
-        plan_duration = data.get('plan')  # "3" or "6"
+        data = request.get_json()
+
+        print("📥 Received:", data)
+
+        plan_duration = data.get('plan')
+        name = data.get('name')
+        email = data.get('email')
+        phone = data.get('phone')
+
+        if not all([plan_duration, name, email, phone]):
+            return jsonify({"error": "Missing required fields"}), 400
 
         if plan_duration == "3":
             plan_id = PLAN_3_MONTHS
@@ -52,14 +61,14 @@ def create_subscription():
         else:
             return jsonify({"error": "Invalid plan selected"}), 400
 
-        # Create Razorpay customer
         customer = razorpay_client.customer.create({
-            "name": data['name'],
-            "email": data['email'],
-            "contact": data['phone']
+            "name": name,
+            "email": email,
+            "contact": phone
         })
 
-        # Create subscription
+        print("✅ Customer:", customer['id'])
+
         subscription = razorpay_client.subscription.create({
             "plan_id": plan_id,
             "customer_notify": 1,
@@ -67,13 +76,15 @@ def create_subscription():
             "customer_id": customer['id']
         })
 
-        # Return subscription ID & Razorpay publishable key
+        print("✅ Subscription:", subscription['id'])
+
         return jsonify({
             "id": subscription['id'],
-            "razorpay_key": rzp_test_KhHe2W8qafLz6Q
+            "razorpay_key": RAZORPAY_KEY_ID
         })
 
     except Exception as e:
+        print("🔥 ERROR in /create-subscription:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route('/add_user', methods=['POST'])
@@ -89,13 +100,10 @@ def add_user():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            """
+        cursor.execute("""
             INSERT INTO users (student_name, father_name, email, mobile_number, ip_address, subscribed_on)
             VALUES (%s, %s, %s, %s, %s, %s)
-            """,
-            (student_name, father_name, email, mobile_number, ip_address, subscribed_on)
-        )
+        """, (student_name, father_name, email, mobile_number, ip_address, subscribed_on))
         conn.commit()
         cursor.close()
         conn.close()
@@ -103,6 +111,7 @@ def add_user():
         return jsonify({"message": "User added successfully!"})
 
     except Exception as e:
+        print("🔥 ERROR in /add_user:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route('/users')
@@ -115,20 +124,20 @@ def list_users():
         cursor.close()
         conn.close()
 
-        users = []
-        for row in rows:
-            users.append({
-                "id": row[0],
-                "student_name": row[1],
-                "father_name": row[2],
-                "email": row[3],
-                "mobile_number": row[4],
-                "ip_address": row[5],
-                "subscribed_on": row[6].isoformat() if row[6] else None
-            })
+        users = [{
+            "id": row[0],
+            "student_name": row[1],
+            "father_name": row[2],
+            "email": row[3],
+            "mobile_number": row[4],
+            "ip_address": row[5],
+            "subscribed_on": row[6].isoformat() if row[6] else None
+        } for row in rows]
+
         return jsonify(users)
 
     except Exception as e:
+        print("🔥 ERROR in /users:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route('/about')
@@ -150,8 +159,14 @@ def privacy():
 @app.route('/refund')
 def refund():
     return render_template('refund.html')
+    @app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
+@app.route('/shipping')
+def shipping():
+    return render_template('shipping.html')
 
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5500)
-
