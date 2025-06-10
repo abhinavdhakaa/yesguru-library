@@ -160,9 +160,9 @@ def privacy():
 def refund():
     return render_template('refund.html')
 
-@app.route('/pricing')
+@app.route('/Pricing')
 def pricing():
-    return render_template('pricing.html')
+    return render_template('Pricing.html')
 
 @app.route('/shipping')
 def shipping():
